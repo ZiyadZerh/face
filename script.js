@@ -19,6 +19,17 @@ toggleFeedButton.addEventListener('click', () => {
 });
 
 /**
+ * Mobile performance optimizations:
+ * 1. Lower resolution on mobile devices.
+ * 2. Throttle detection frequency.
+ */
+const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+const cameraWidth = isMobile ? 320 : 640; // Lower resolution on mobile.
+const cameraHeight = cameraWidth;
+let lastDetectionTime = 0;
+const detectionInterval = isMobile ? 150 : 50; // Throttle rate in ms (mobile slower).
+
+/**
  * Define simplified connectors for hand features.
  */
 
@@ -173,12 +184,16 @@ function renderFrame() {
 // Initialize MediaPipe Camera from the camera_utils library.
 const camera = new Camera(videoElement, {
   onFrame: async () => {
-    // Process the current video frame for both face and hand landmarks.
-    await faceMesh.send({ image: videoElement });
-    await hands.send({ image: videoElement });
+    // Throttle detection frequency to reduce load on mobile.
+    const now = Date.now();
+    if (now - lastDetectionTime >= detectionInterval) {
+      lastDetectionTime = now;
+      await faceMesh.send({ image: videoElement });
+      await hands.send({ image: videoElement });
+    }
   },
-  width: 640,  // Dimensions for the square feed.
-  height: 640,
+  width: cameraWidth,  // Use lower resolution on mobile.
+  height: cameraHeight,
   facingMode: "user" // Use the selfie camera for mobile devices.
 });
 camera.start();
