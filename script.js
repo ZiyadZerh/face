@@ -7,6 +7,17 @@ const canvasCtx = canvasElement.getContext('2d');
 let latestFaceLandmarks = null;
 let latestHandsLandmarks = null;
 
+// Global flag to toggle live feed visibility.
+let showLiveFeed = false;
+
+// Get reference to the toggle button.
+const toggleFeedButton = document.getElementById('toggleFeed');
+toggleFeedButton.addEventListener('click', () => {
+  showLiveFeed = !showLiveFeed;
+  // Update the button text based on current state.
+  toggleFeedButton.textContent = showLiveFeed ? 'Hide Live Feed' : 'Show Live Feed';
+});
+
 /**
  * Define simplified connectors for hand features.
  */
@@ -100,16 +111,28 @@ videoElement.addEventListener('loadedmetadata', () => {
 
 /**
  * Render loop that:
- * 1. Fills the canvas with black.
- * 2. Applies a horizontal mirror (inversion) transformation.
- * 3. Draws the landmark lines for facial features (with distinct colors) and hand.
+ * 1. Clears the canvas.
+ * 2. Draws either the inverted live video feed or a black background based on the toggle state.
+ * 3. Applies a horizontal mirror transformation to draw the landmark lines in the correct orientation.
  */
 function renderFrame() {
-  // Fill the canvas with black.
-  canvasCtx.fillStyle = 'black';
-  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+  // Clear the canvas.
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-  // Save and invert the canvas horizontally.
+  if (showLiveFeed) {
+    // Draw the live video feed with inversion.
+    canvasCtx.save();
+    canvasCtx.translate(canvasElement.width, 0);
+    canvasCtx.scale(-1, 1);
+    canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.restore();
+  } else {
+    // Fill the background with black.
+    canvasCtx.fillStyle = 'black';
+    canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+  }
+
+  // Draw landmark overlays with inversion.
   canvasCtx.save();
   canvasCtx.translate(canvasElement.width, 0);
   canvasCtx.scale(-1, 1);
@@ -142,7 +165,8 @@ function renderFrame() {
       drawConnectors(canvasCtx, landmarks, FINGER_CONNECTIONS, { color: '#FFA500', lineWidth: 2 });
     }
   }
-  canvasCtx.restore(); // Restore to default state.
+  canvasCtx.restore();
+
   requestAnimationFrame(renderFrame);
 }
 
@@ -154,7 +178,8 @@ const camera = new Camera(videoElement, {
     await hands.send({ image: videoElement });
   },
   width: 640,  // Dimensions for the square feed.
-  height: 640
+  height: 640,
+  facingMode: "user" // Use the selfie camera for mobile devices.
 });
 camera.start();
 
