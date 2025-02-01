@@ -1,0 +1,41 @@
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Center the container and enforce a fixed 640×640 square */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000; /* Dark background */
+}
+
+/* Container holds the video (hidden) and the overlay canvas */
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1 / 1; /* Maintains a square aspect ratio */
+}
+
+/* Video element is hidden since we only want to show the drawn lines */
+#video {
+  display: none;
+}
+
+/* Canvas covers the entire container */
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
