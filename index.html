@@ -8,11 +8,14 @@
 </head>
 <body>
   <div class="container">
-    <!-- The live video feed (hidden) -->
+    <!-- The live video feed (hidden by default in CSS) -->
     <video id="video" playsinline autoplay muted></video>
-    <!-- Canvas overlay for drawing landmarks lines -->
+    <!-- Canvas overlay for drawing landmark lines -->
     <canvas id="output"></canvas>
   </div>
+  
+  <!-- Toggle button for mobile -->
+  <button id="toggleFeed">Show Live Feed</button>
   
   <!-- MediaPipe libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
